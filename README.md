@@ -1,9 +1,46 @@
-This is free and unencumbered software released into the public domain.
+# Agenda Cabinet Stomatologic
 
-Anyone is free to copy, modify, publish, use, compile, sell, or distribute this software, either in source code form or as a compiled binary, for any purpose, commercial or non-commercial, and by any means.
+Aplicație web simplă pentru gestionarea pacienților și programărilor unui cabinet stomatologic, cu remindere automate pe email cu 2 zile înainte.
 
-In jurisdictions that recognize copyright laws, the author or authors of this software dedicate any and all copyright interest in the software to the public domain. We make this dedication for the benefit of the public at large and to the detriment of our heirs and successors. We intend this dedication to be an overt act of relinquishment in perpetuity of all present and future rights to this software under copyright law.
+## Tehnologii
+- Flask + SQLite
+- FullCalendar pentru vizualizarea programărilor (lună / săptămână)
+- Tailwind CSS pentru UI
+- APScheduler pentru jobul de remindere
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+## Configurare
+1. Python 3.10+
+2. Instalează dependențele:
+```bash
+pip install -r requirements.txt
+```
+3. (Opțional) Configurează variabilele de mediu pentru email. Creează un fișier `.env` sau exportă în shell:
+```
+SECRET_KEY=schimba-ma
+APP_TIMEZONE=Europe/Bucharest
+DATABASE_URL=sqlite:////workspace/dental.db
 
-For more information, please refer to https://unlicense.org
+# Config SMTP (opțional; dacă lipsesc, emailurile se vor afișa în consolă)
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=utilizator@example.com
+SMTP_PASS=parola
+SENDER_EMAIL=utilizator@example.com
+SENDER_NAME=Cabinet Stomatologic
+```
+4. Rulează aplicația:
+```bash
+python app.py
+```
+Apoi deschide `http://localhost:5000`.
+
+## Funcționalități
+- Înregistrare pacienți (nume, telefon, email)
+- Calendar lună/săptămână, creare programări prin selectarea intervalului
+- Reprogramare prin drag & drop sau editare din modal
+- Ștergere programare
+- Reminder automat pe email cu 2 zile înainte (rulează orar; dacă SMTP nu e configurat, se loghează în consolă)
+
+## Note
+- Datele sunt stocate în `SQLite` la calea setată de `DATABASE_URL` (implicit `/workspace/dental.db`).
+- Timpurile sunt tratate ca timp local (ex. `Europe/Bucharest`).

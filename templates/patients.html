@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex flex-col gap-6">
+  <div class="bg-white rounded-lg shadow p-4">
+    <h2 class="text-lg font-semibold mb-4">Înregistrare pacient</h2>
+    {% if error %}
+      <div class="mb-4 p-3 rounded bg-red-50 text-red-700">{{ error }}</div>
+    {% endif %}
+    <form method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-sm mb-1">Nume complet</label>
+        <input name="full_name" required class="w-full border rounded px-3 py-2" placeholder="Ex: Popescu Andrei" />
+      </div>
+      <div>
+        <label class="block text-sm mb-1">Telefon</label>
+        <input name="phone" class="w-full border rounded px-3 py-2" placeholder="07xx xxx xxx" />
+      </div>
+      <div>
+        <label class="block text-sm mb-1">Email</label>
+        <input name="email" type="email" class="w-full border rounded px-3 py-2" placeholder="exemplu@mail.com" />
+      </div>
+      <div class="md:col-span-3">
+        <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Adaugă pacient</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-4">
+    <h2 class="text-lg font-semibold mb-4">Lista pacienților</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full">
+        <thead>
+          <tr class="text-left text-sm text-gray-500">
+            <th class="py-2">Nume</th>
+            <th class="py-2">Telefon</th>
+            <th class="py-2">Email</th>
+            <th class="py-2">Înregistrat</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for p in patients %}
+          <tr class="border-t">
+            <td class="py-2">{{ p.full_name }}</td>
+            <td class="py-2">{{ p.phone or '—' }}</td>
+            <td class="py-2">{{ p.email or '—' }}</td>
+            <td class="py-2 text-sm text-gray-500">{{ p.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+          </tr>
+        {% else %}
+          <tr><td class="py-6 text-center text-gray-500" colspan="4">Nu există pacienți încă.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
