@@ -1,0 +1,21 @@
+[project]
+name = "agenda-stoma"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+  "Flask==3.0.3",
+  "Flask-SQLAlchemy==3.1.1",
+  "APScheduler==3.10.4",
+  "python-dotenv==1.0.1",
+  "pytz==2024.1",
+]
+
+[project.scripts]
+agenda-stoma = "app:run"
+
+[tool.pyinstaller]
+# Additional data files to bundle (templates, static)
+add-data = [
+  "templates:templates",
+  "static:static",
+]

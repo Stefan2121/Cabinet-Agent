@@ -1,0 +1,6 @@
+#calendar {
+  max-width: 100%;
+}
+
+/* Modal fallback (hidden via Tailwind utility by default) */
+#appointmentModal.hidden { display: none; }
