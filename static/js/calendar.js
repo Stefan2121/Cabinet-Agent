@@ -10,8 +10,11 @@
   const patientSelect = document.getElementById('patientSelect');
   const startInput = document.getElementById('startInput');
   const endInput = document.getElementById('endInput');
+  const serviceSelect = document.getElementById('serviceSelect');
   const noteInput = document.getElementById('noteInput');
   const deleteBtn = document.getElementById('deleteBtn');
+  const sendReminderBtn = document.getElementById('sendReminderBtn');
+  const doctorSelect = document.getElementById('doctorSelect');
 
   function isoLocal(date) {
     const pad = (n) => String(n).padStart(2, '0');
@@ -35,6 +38,18 @@
     }
   }
 
+  async function fetchServices() {
+    const res = await fetch('/api/services');
+    const data = await res.json();
+    serviceSelect.innerHTML = '';
+    for (const s of data) {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = s;
+      serviceSelect.appendChild(opt);
+    }
+  }
+
   function openModal({ title, event }) {
     modalTitle.textContent = title;
     modal.classList.remove('hidden');
@@ -45,18 +60,24 @@
       startInput.value = event.startStr.slice(0,16);
       endInput.value = event.endStr ? event.endStr.slice(0,16) : startInput.value;
       noteInput.value = event.extendedProps?.note || '';
-      // Try to preselect patient by title match (best-effort)
+      serviceSelect.value = event.extendedProps?.service || 'Consult';
+      // Try to preselect patient by title prefix (patient name before bullet)
+      const title = event.title || '';
+      const patientName = title.split('•')[0].trim();
       for (const opt of patientSelect.options) {
-        if (opt.textContent === event.title) {
+        if (opt.textContent === patientName) {
           patientSelect.value = opt.value;
           break;
         }
       }
       deleteBtn.classList.remove('hidden');
+      sendReminderBtn.classList.remove('hidden');
     } else {
       idInput.value = '';
       noteInput.value = '';
+      serviceSelect.value = 'Consult';
       deleteBtn.classList.add('hidden');
+      sendReminderBtn.classList.add('hidden');
     }
   }
 
@@ -74,16 +95,19 @@
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = idInput.value;
+    const doctor_id = Number(doctorSelect.value);
     const payload = {
       patient_id: Number(patientSelect.value),
+      doctor_id,
       start: new Date(startInput.value).toISOString(),
       end: new Date(endInput.value).toISOString(),
+      service: serviceSelect.value,
       note: noteInput.value || null,
     };
 
     try {
       if (id) {
-        const { patient_id, ...updates } = payload; // patient change not supported here
+        const { patient_id, doctor_id, ...updates } = payload; // no change doctor/patient here
         const res = await fetch(`/api/events/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -119,6 +143,18 @@
     }
   });
 
+  sendReminderBtn.addEventListener('click', async () => {
+    const id = idInput.value;
+    if (!id) return;
+    try {
+      const res = await fetch(`/api/events/${id}/send_reminder`, { method: 'POST' });
+      if (!res.ok) throw new Error('Trimitere eșuată');
+      alert('Reminder trimis.');
+    } catch (err) {
+      alert(err.message || 'Eroare');
+    }
+  });
+
   function defaultEnd(startDate) {
     const d = new Date(startDate.getTime());
     d.setMinutes(d.getMinutes() + 60);
@@ -126,7 +162,7 @@
   }
 
   async function init() {
-    await fetchPatients();
+    await Promise.all([fetchPatients(), fetchServices()]);
 
     calendar = new FullCalendar.Calendar(calendarEl, {
       locale: 'ro',
@@ -141,7 +177,7 @@
       eventSources: [{
         events: async (info, success, failure) => {
           try {
-            const params = new URLSearchParams({ start: info.startStr, end: info.endStr });
+            const params = new URLSearchParams({ start: info.startStr, end: info.endStr, doctor_id: String(doctorSelect.value) });
             const res = await fetch(`/api/events?${params.toString()}`);
             const data = await res.json();
             success(data);
@@ -151,7 +187,6 @@
         }
       }],
       select: async (selection) => {
-        // Create new appointment
         const start = new Date(selection.start);
         const end = selection.end ? new Date(selection.end) : defaultEnd(start);
         startInput.value = isoLocal(start);
@@ -199,6 +234,10 @@
     });
 
     calendar.render();
+
+    doctorSelect.addEventListener('change', () => {
+      calendar.refetchEvents();
+    });
   }
 
   window.addEventListener('DOMContentLoaded', init);

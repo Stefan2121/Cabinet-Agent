@@ -2,6 +2,16 @@
 
 {% block content %}
 <div class="bg-white rounded-lg shadow p-4">
+  <div class="flex items-center justify-between mb-4 gap-3">
+    <div class="flex items-center gap-2">
+      <label class="text-sm">Medicul:</label>
+      <select id="doctorSelect" class="border rounded px-3 py-2">
+        {% for d in doctors %}
+          <option value="{{ d.id }}">{{ d.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
   <div id="calendar"></div>
 </div>
 
@@ -26,13 +36,20 @@
         <label class="block text-sm mb-1">Sfârșit</label>
         <input id="endInput" type="datetime-local" class="w-full border rounded px-3 py-2" required />
       </div>
+      <div>
+        <label class="block text-sm mb-1">Serviciu</label>
+        <select id="serviceSelect" class="w-full border rounded px-3 py-2"></select>
+      </div>
       <div class="md:col-span-2">
         <label class="block text-sm mb-1">Notă (opțional)</label>
         <textarea id="noteInput" class="w-full border rounded px-3 py-2" rows="3"></textarea>
       </div>
-      <div class="md:col-span-2 flex items-center justify-end gap-3 mt-2">
+      <div class="md:col-span-2 flex items-center justify-between gap-3 mt-2">
         <button id="deleteBtn" type="button" class="hidden text-red-600 hover:text-red-700">Șterge</button>
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Salvează</button>
+        <div class="flex items-center gap-3">
+          <button id="sendReminderBtn" type="button" class="hidden text-blue-600 hover:text-blue-700">Trimite reminder</button>
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Salvează</button>
+        </div>
       </div>
     </form>
   </div>

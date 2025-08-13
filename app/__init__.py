@@ -1,4 +1,5 @@
 import os
+import sys
 from flask import Flask, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -9,10 +10,17 @@ scheduler = BackgroundScheduler(timezone=os.getenv('APP_TIMEZONE', 'Europe/Bucha
 
 
 def create_app():
-    app = Flask(__name__, static_folder="../static", template_folder="../templates")
+    bundled_base = getattr(sys, "_MEIPASS", None)
+    base_dir = bundled_base if bundled_base else os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    app = Flask(
+        __name__,
+        static_folder=os.path.join(base_dir, "static"),
+        template_folder=os.path.join(base_dir, "templates"),
+    )
 
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "change-me")
-    db_path = os.getenv("DATABASE_URL", "sqlite:////workspace/dental.db")
+    # Default DB to local file in current working dir for portability
+    db_path = os.getenv("DATABASE_URL", "sqlite:///dental.db")
     app.config["SQLALCHEMY_DATABASE_URI"] = db_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -21,6 +29,14 @@ def create_app():
     with app.app_context():
         from . import models  # noqa: F401
         db.create_all()
+        # Seed default doctors if none exist
+        from .models import Doctor
+        if Doctor.query.count() == 0:
+            db.session.add_all([
+                Doctor(name="Dr. Popescu"),
+                Doctor(name="Dr. Ionescu"),
+            ])
+            db.session.commit()
 
     # Register routes
     from .routes import bp as main_bp
@@ -35,9 +51,7 @@ def create_app():
     from .mail import send_appointment_reminder_emails
 
     def run_reminders():
-        from datetime import datetime
         try:
-            # Ensure app context for DB operations
             with app.app_context():
                 send_appointment_reminder_emails()
         except Exception as e:
@@ -54,7 +68,6 @@ def create_app():
         try:
             scheduler.start()
         except Exception:
-            # In some environments scheduler may fail to start (e.g., fork limitations)
             pass
 
     return app
