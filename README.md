@@ -78,3 +78,23 @@ pyinstaller --noconsole --onefile ^
 
 ## Medici inițiali
 - La prima pornire, dacă nu există medici în baza de date, se adaugă automat: `Simona Hutanu` și `Iustin Dumitrescu`.
+
+## Rulare în Visual Studio Code
+1. Instalează extensia “Python” (Microsoft).
+2. Deschide folderul proiectului în VS Code.
+3. În terminalul integrat, creează mediul și instalează dependențele:
+```bash
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+```
+4. Opțional: rulează taskul “Fetch vendor assets” (Ctrl/Cmd+Shift+P → Run Task).
+5. Debug → selectează “Run Agenda Stoma (app.py)” și Start.
+
+## Rulare în Visual Studio (Windows)
+1. Instalează “Python Development” workload (Visual Studio Installer).
+2. File → Open → Folder… și alege folderul proiectului.
+3. Setează “app.py” ca Startup File (click dreapta → Set as Startup File).
+4. În “Python Environments”, creează un virtual environment și instalează dependențele din `requirements.txt` (pip install -r requirements.txt).
+5. Start Debug/Run. Aplicația pornește pe `http://127.0.0.1:5000`.
