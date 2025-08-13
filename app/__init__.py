@@ -33,8 +33,8 @@ def create_app():
         from .models import Doctor
         if Doctor.query.count() == 0:
             db.session.add_all([
-                Doctor(name="Dr. Popescu"),
-                Doctor(name="Dr. Ionescu"),
+                Doctor(name="Simona Hutanu"),
+                Doctor(name="Iustin Dumitrescu"),
             ])
             db.session.commit()
 

@@ -44,3 +44,37 @@ Apoi deschide `http://localhost:5000`.
 ## Note
 - Datele sunt stocate în `SQLite` la calea setată de `DATABASE_URL` (implicit `/workspace/dental.db`).
 - Timpurile sunt tratate ca timp local (ex. `Europe/Bucharest`).
+
+## Rulare în browser (web) - producție
+- Instalează gunicorn:
+```bash
+pip install gunicorn
+```
+- Rulează serverul WSGI:
+```bash
+gunicorn -w 2 -b 0.0.0.0:5000 wsgi:app
+```
+- Pentru deploy pe un server Linux: rulează gunicorn ca serviciu systemd sau într-un container Docker în spatele unui reverse proxy (ex. Nginx).
+
+## Build EXE pentru Windows (installer)
+1. Pe Windows, cu Python instalat, creează un mediu și instalează dependențele și PyInstaller:
+```powershell
+py -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+pip install pyinstaller
+```
+2. Descarcă asset-urile vendor (o singură dată):
+```powershell
+py scripts\fetch_vendor.py
+```
+3. Construiește executabilul:
+```powershell
+pyinstaller --noconsole --onefile ^
+  --add-data "templates;templates" ^
+  --add-data "static;static" app.py
+```
+4. (Opțional) Creează un installer folosind Inno Setup sau NSIS, incluzând fișierul `dist\app.exe`.
+
+## Medici inițiali
+- La prima pornire, dacă nu există medici în baza de date, se adaugă automat: `Simona Hutanu` și `Iustin Dumitrescu`.
